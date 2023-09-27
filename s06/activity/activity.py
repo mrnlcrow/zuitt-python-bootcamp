@@ -1,3 +1,4 @@
+#there is a better way to do this, check if the attributes/properties in abstract class can be inherited by its other classes and how
 from abc import ABC, abstractmethod
 
 class Person(ABC):
