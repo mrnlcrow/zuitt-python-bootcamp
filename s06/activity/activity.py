@@ -1,4 +1,5 @@
-#there is a better way to do this, check if the attributes/properties in abstract class can be inherited by its other classes and how
+# there is a better way to do this, check if the attributes/properties in abstract class can be inherited 
+# by its other classes and how, they did the same from chatgpt
 from abc import ABC, abstractmethod
 
 class Person(ABC):
@@ -99,9 +100,6 @@ class TeamLead(Person):
 
     def setDepartment(self, department):
         self._department = department
-
-    def setMembers(self,memberName):
-        self._members.append(memberName)
 
     def get_members(self):
         return self._members
