@@ -8,5 +8,10 @@ urlpatterns=[
 	# to the URL patters of your project while only touching a single file
 	# Syntax: path(route,view,name)
 	path('', views.index, name='index'), # we have defined this in views.py, views.index means index fxn inside views.py
+	path('<int:todoitem_id>/',views.todoitem, name='viewtodoitem'),
+	path('register',views.register, name="register"),
+	path('change_password',views.change_password,name="change_password"),
+	path('login',views.login_view, name="login"),
+	path('logout',views.logout_view,name="logout")
 ]
  
