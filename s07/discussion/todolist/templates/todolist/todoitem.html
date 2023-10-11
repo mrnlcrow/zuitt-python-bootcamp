@@ -1,6 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
 <h1>{{task_name}}</h1>
 <h3>Description</h3>
 <p>{{ description }}</p>
 <h3>Status</h3>
 <p>{{ status }}</p>
-<a href="index">Back to index page</a>
+<a href="{% url 'todolist:index' %}">Back to index page</a>
+{% endblock %}

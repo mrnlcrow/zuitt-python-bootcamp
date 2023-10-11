@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect, get_object_or_404
 
 # Create your views here.
 # The from keyword allows importing of necessary classes,methods and other items needed in out application from the "django.http"
@@ -9,10 +9,15 @@ from .models import ToDoItem
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.forms.models import model_to_dict #to convert models into dictionaries
+from django import forms
+
+#local imports
+from .models import ToDoItem
+from .forms import LoginForm, AddTaskForm, UpdateTaskForm
 
 #this is shortened syntax
 def index(request):
-	todoitem_list =  ToDoItem.objects.all()
+	todoitem_list =  ToDoItem.objects.filter(user_id=request.user.id)
 	context = {
 		'todoitem_list':todoitem_list,
 		'user':request.user
@@ -21,8 +26,8 @@ def index(request):
 	return render(request,"todolist/index.html",context)  
 
 def todoitem(request,todoitem_id):
-	todoitem=model_to_dict(ToDoItem.objects.get(pk=todoitem_id))
-	return render(request,"todolist/todoitem.html",todoitem)
+	todoitem=get_object_or_404(ToDoItem, pk=todoitem_id)
+	return render(request,"todolist/todoitem.html",model_to_dict(todoitem))
 
 def register(request):
 	users = User.objects.all()
@@ -75,21 +80,114 @@ def change_password(request):
 	return render(request,"todolist/change_password.html",context)
 
 def login_view(request):
-	username="johndoe"
-	password="johndoe1"
-	user=authenticate(username=username,password=password)
-	context = {
-		"is_user_authenticated":False
-	}
-	if user is not None:
-		login(request, user)
-		context={
-			"is_user_authenticated":True
-		}
-		return redirect("index")
-	else:
-		return render(request,"todolist/login.html",context)
+	context={}
+
+	if request.method == 'POST':
+		form=LoginForm(request.POST)
+
+		if form.is_valid() == False:
+			form=LoginForm()
+		else:
+			username=form.cleaned_data['username']
+			password=form.cleaned_data['password']
+			user=authenticate(username=username,password=password)
+			context={
+				"username":username,
+				"password":password
+			}
+			if user is not None :
+				login(request,user)
+				return redirect("todolist:index") 
+			else:
+				context={
+					"error":True
+				}
+
+	return render(request,"todolist/login.html",context)
 
 def logout_view(request):
 	logout(request)
-	return redirect("index")
+	return redirect("todolist:index")
+
+
+def add_task(request):
+
+    context = {}
+
+    if request.method == 'POST':
+
+        form = AddTaskForm(request.POST)
+
+        if form.is_valid() == False:
+
+            form = AddTaskForm()
+
+        else:
+
+            task_name = form.cleaned_data['task_name']
+            description = form.cleaned_data['description']
+
+            # Checks the database if a task already exists
+            # By default the "filter" method searches for records that are case insensitive
+            duplicates = ToDoItem.objects.filter(task_name=task_name)
+
+            # if todoitem does not contain any duplicates
+            if not duplicates:
+
+                # Creates an object based on the "ToDoItem" model and saves the record in the database
+                ToDoItem.objects.create(task_name=task_name, description=description, date_created=timezone.now(), user_id=request.user.id)
+                return redirect("todolist:index")
+
+            else:
+
+                context = {
+                    "error": True
+                }
+
+    return render(request, "todolist/add_task.html", context)
+
+
+def update_task(request, todoitem_id):
+
+    # Returns a queryset
+    todoitem = ToDoItem.objects.filter(pk=todoitem_id)
+
+    context = {
+        "user": request.user,
+        "todoitem_id": todoitem_id,
+        # Accessing the first element is necessary because the "ToDoItem.objects.filter()" method returns a queryset
+        "task_name": todoitem[0].task_name,
+        "description": todoitem[0].description,
+        "status": todoitem[0].status
+    }
+
+    if request.method == 'POST':
+
+        form = UpdateTaskForm(request.POST)
+
+        if form.is_valid() == False:
+
+            form = UpdateTaskForm()
+
+        else:
+
+            task_name = form.cleaned_data['task_name']
+            description = form.cleaned_data['description']
+            status = form.cleaned_data['status']
+
+            if todoitem:
+
+                todoitem[0].task_name = task_name
+                todoitem[0].description = description
+                todoitem[0].status = status
+
+                todoitem[0].save()
+                return redirect("todolist:index")
+
+            else:
+
+                context = {
+                    "error": True
+                }
+
+    return render(request, "todolist/update_task.html", context)

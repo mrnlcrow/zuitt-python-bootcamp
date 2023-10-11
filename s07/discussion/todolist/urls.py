@@ -2,6 +2,8 @@ from django.urls import path
 # . means all
 from . import views
 
+app_name='todolist'
+
 urlpatterns=[
 	# the path() fxn will receive four arguments
 	# We'll focus on the two arguments that are required, "route"&"view",and the third, "name" which allows us to make global changes
@@ -12,6 +14,8 @@ urlpatterns=[
 	path('register',views.register, name="register"),
 	path('change_password',views.change_password,name="change_password"),
 	path('login',views.login_view, name="login"),
-	path('logout',views.logout_view,name="logout")
+	path('logout',views.logout_view,name="logout"),
+	path('add_task',views.add_task,name="add_task"),
+	
 ]
  
