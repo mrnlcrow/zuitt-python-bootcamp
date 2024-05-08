@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.forms.models import model_to_dict #to convert models into dictionaries
 from django import forms
-
+from django.utils import timezone
 #local imports
 from .models import ToDoItem
 from .forms import LoginForm, AddTaskForm, UpdateTaskForm
@@ -25,7 +25,7 @@ def index(request):
 	}
 	return render(request,"todolist/index.html",context)  
 
-def todoitem(request,todoitem_id):
+def todoitem(request, todoitem_id):
 	todoitem=get_object_or_404(ToDoItem, pk=todoitem_id)
 	return render(request,"todolist/todoitem.html",model_to_dict(todoitem))
 
@@ -191,3 +191,8 @@ def update_task(request, todoitem_id):
                 }
 
     return render(request, "todolist/update_task.html", context)
+
+
+def delete_task(request, todoitem_id):
+	todoitem = ToDoItem.objects.filter(pk=todoitem_id).delete()
+	return redirect("todolist:index")

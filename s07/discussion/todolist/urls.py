@@ -15,7 +15,9 @@ urlpatterns=[
 	path('change_password',views.change_password,name="change_password"),
 	path('login',views.login_view, name="login"),
 	path('logout',views.logout_view,name="logout"),
-	path('add_task',views.add_task,name="add_task"),
+	path('add_task/',views.add_task,name="add_task"),
+	path('<int:todoitem_id>/edit', views.update_task, name='update_task'),
+	path('<int:todoitem_id>/delete', views.delete_task, name='delete_task'),
 	
 ]
  
